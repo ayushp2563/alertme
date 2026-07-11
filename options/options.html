@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Me — Dashboard</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="logo">
+        <h1>Alert Me</h1>
+        <p>Website change monitor</p>
+      </div>
+      <nav>
+        <button class="nav-btn active" data-view="sites">Watched Sites</button>
+        <button class="nav-btn" data-view="settings">Settings</button>
+        <button class="nav-btn" data-view="privacy">Privacy</button>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <!-- Sites view -->
+      <section id="view-sites" class="view">
+        <header class="view-header">
+          <h2>Watched Sites</h2>
+          <div class="header-actions">
+            <button id="btn-check-all" class="btn btn-secondary">Check all now</button>
+          </div>
+        </header>
+
+        <div id="sites-table" class="sites-table">
+          <p class="empty-state">No sites being watched. Use the extension popup to add one.</p>
+        </div>
+
+        <!-- Site detail panel -->
+        <div id="site-detail" class="site-detail hidden">
+          <button id="btn-back" class="btn-link">← Back to list</button>
+          <div id="detail-content"></div>
+        </div>
+      </section>
+
+      <!-- Settings view -->
+      <section id="view-settings" class="view hidden">
+        <header class="view-header">
+          <h2>Settings</h2>
+        </header>
+        <form id="settings-form" class="settings-form">
+          <div class="form-group">
+            <label for="significance-threshold">
+              Significance threshold (%)
+              <span class="hint">Ignore changes below this percentage</span>
+            </label>
+            <input type="number" id="significance-threshold" min="0" max="100" step="0.5" value="2">
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="global-check-enabled" checked>
+              Enable automatic background checks
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary">Save settings</button>
+        </form>
+      </section>
+      <!-- Privacy view -->
+      <section id="view-privacy" class="view hidden">
+        <header class="view-header">
+          <h2>Privacy Policy</h2>
+        </header>
+        <div class="privacy-content">
+          <div class="privacy-highlight">
+            <strong>Summary:</strong> All data stays on your device. No accounts, no cloud, no analytics.
+          </div>
+          <h3>What is stored locally</h3>
+          <ul>
+            <li>URLs and titles of sites you watch</li>
+            <li>CSS selectors (if using section watch)</li>
+            <li>Content hashes and change history</li>
+            <li>Your settings (frequency, threshold)</li>
+          </ul>
+          <h3>What is transmitted</h3>
+          <p>Network requests are made <em>only</em> to websites you have chosen to monitor — directly from your browser, with no intermediary servers.</p>
+          <h3>Why site access is needed</h3>
+          <p>Broad site access lets you watch any page you choose. Fetches run only for URLs on your watch list. The element picker activates only when you click "Watch section".</p>
+          <p><a id="link-full-privacy" href="#">View full privacy policy</a></p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../lib/browser.js"></script>
+  <script src="../lib/storage.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

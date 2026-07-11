@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Me</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header class="header">
+    <h1>Alert Me</h1>
+    <span id="unread-badge" class="unread-badge hidden">0</span>
+  </header>
+
+  <section id="current-page" class="current-page">
+    <div class="page-info">
+      <img id="page-favicon" class="favicon" src="" alt="" hidden>
+      <div>
+        <p id="page-title" class="page-title">Loading…</p>
+        <p id="page-url" class="page-url"></p>
+      </div>
+    </div>
+    <div class="actions">
+      <button id="btn-watch" class="btn btn-primary">Watch this page</button>
+      <button id="btn-watch-section" class="btn btn-secondary">Watch section</button>
+      <button id="btn-unwatch" class="btn btn-danger hidden">Stop watching</button>
+    </div>
+  </section>
+
+  <section class="sites-section">
+    <div class="section-header">
+      <h2>Watched sites</h2>
+      <button id="btn-check-now" class="btn-link">Check now</button>
+    </div>
+    <ul id="sites-list" class="sites-list">
+      <li class="empty-state">No sites watched yet</li>
+    </ul>
+  </section>
+
+  <footer class="footer">
+    <a id="link-dashboard" href="#">Dashboard</a>
+    <a id="link-privacy" href="#">Privacy</a>
+    <button id="btn-mark-all-read" class="btn-link">Mark all read</button>
+  </footer>
+
+  <script src="../lib/browser.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

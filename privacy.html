@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alert Me — Privacy Policy</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      color: #1a1a2e;
+      background: #f5f5f7;
+      padding: 40px 20px;
+    }
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .updated { color: #888; font-size: 13px; margin-bottom: 32px; }
+    h2 { font-size: 16px; margin: 28px 0 10px; color: #E85D04; }
+    p, li { margin-bottom: 10px; color: #333; }
+    ul { padding-left: 20px; }
+    a { color: #E85D04; }
+    .highlight {
+      background: #fef0e6;
+      border-left: 3px solid #E85D04;
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Alert Me — Privacy Policy</h1>
+    <p class="updated">Last updated: July 10, 2026</p>
+
+    <div class="highlight">
+      <strong>Summary:</strong> Alert Me stores all data locally on your device. We do not collect, transmit, or sell any personal information. No accounts, no cloud servers, no analytics.
+    </div>
+
+    <h2>What data is stored</h2>
+    <p>All data is saved in your browser's local storage (<code>chrome.storage.local</code>) and never leaves your device:</p>
+    <ul>
+      <li>URLs and page titles of sites you choose to watch</li>
+      <li>CSS selectors for section-level watching (if you use that feature)</li>
+      <li>Content hashes and text snapshots used for change detection</li>
+      <li>Change history (timestamps, summaries, diff snippets)</li>
+      <li>Your settings (check frequency, significance threshold)</li>
+    </ul>
+
+    <h2>What data is transmitted</h2>
+    <p>Alert Me makes network requests <em>only</em> to the websites you have explicitly chosen to monitor. These requests are made directly from your browser to those sites — the same as if you visited them yourself. No intermediary servers are involved.</p>
+    <p>Alert Me does <strong>not</strong>:</p>
+    <ul>
+      <li>Send data to any third-party servers</li>
+      <li>Use analytics or tracking services</li>
+      <li>Require an account or login</li>
+      <li>Sync data across devices</li>
+      <li>Share your watched sites with other users</li>
+    </ul>
+
+    <h2>Why broad site access is needed</h2>
+    <p>Alert Me requests permission to access websites (<code>&lt;all_urls&gt;</code>) because you can choose to watch any public page. This permission is used solely to:</p>
+    <ul>
+      <li>Fetch page content for change comparison</li>
+      <li>Run the element picker when you click "Watch section"</li>
+    </ul>
+    <p>Content scripts are only activated when you explicitly use the picker. Background fetches occur only for URLs you have added to your watch list.</p>
+
+    <h2>Notifications</h2>
+    <p>Alert Me uses your operating system's native notification API to alert you of detected changes. Notification content is generated locally from diff results and is not sent to any external service.</p>
+
+    <h2>Data retention and deletion</h2>
+    <p>Data persists until you remove a watched site, clear extension storage, or uninstall the extension. You can delete individual sites and their history from the Dashboard at any time.</p>
+
+    <h2>Children's privacy</h2>
+    <p>Alert Me does not knowingly collect any information from anyone, including children under 13.</p>
+
+    <h2>Changes to this policy</h2>
+    <p>If this policy changes, the updated version will be included in the extension package. Material changes will be noted in the extension changelog.</p>
+
+    <h2>Contact</h2>
+    <p>Questions about this policy can be directed to the extension developer via the project's GitHub repository or support channel listed on the store listing.</p>
+  </div>
+</body>
+</html>

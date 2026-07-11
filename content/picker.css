@@ -1,0 +1,34 @@
+#alert-me-picker-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  cursor: crosshair;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+#alert-me-highlight {
+  position: absolute;
+  display: none;
+  pointer-events: none;
+  border: 2px solid #E85D04;
+  background: rgba(232, 93, 4, 0.12);
+  border-radius: 3px;
+  transition: top 0.05s, left 0.05s, width 0.05s, height 0.05s;
+  z-index: 2147483647;
+}
+
+#alert-me-instructions {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a2e;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 14px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  z-index: 2147483647;
+  pointer-events: none;
+}
