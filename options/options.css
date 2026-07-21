@@ -350,6 +350,43 @@ tr:hover td { background: #fafafa; }
   cursor: pointer;
 }
 
+.settings-divider {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 24px 0;
+}
+
+.settings-section-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.settings-note {
+  font-size: 12px;
+  color: #888;
+  margin-bottom: 16px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
+.form-row .form-group {
+  flex: 1;
+}
+
+.form-group input[type="time"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.status-snoozed { background: #eef2ff; color: #6366f1; }
+
 .frequency-input {
   width: 60px;
 }

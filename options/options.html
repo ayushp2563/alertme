@@ -60,6 +60,39 @@
               Enable automatic background checks
             </label>
           </div>
+          <hr class="settings-divider">
+          <h3 class="settings-section-title">Cross-device sync</h3>
+          <p class="settings-note">Uses your browser account sync (Chrome/Firefox sign-in). No external servers.</p>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="cross-device-sync" checked>
+              Sync watched sites across devices
+            </label>
+          </div>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="cross-device-notifications" checked>
+              Notify all devices when a change is detected
+            </label>
+          </div>
+          <hr class="settings-divider">
+          <h3 class="settings-section-title">Quiet hours</h3>
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="quiet-hours-enabled">
+              Suppress notifications during quiet hours
+            </label>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="quiet-hours-start">From</label>
+              <input type="time" id="quiet-hours-start" value="22:00">
+            </div>
+            <div class="form-group">
+              <label for="quiet-hours-end">To</label>
+              <input type="time" id="quiet-hours-end" value="08:00">
+            </div>
+          </div>
           <button type="submit" class="btn btn-primary">Save settings</button>
         </form>
       </section>
@@ -70,14 +103,15 @@
         </header>
         <div class="privacy-content">
           <div class="privacy-highlight">
-            <strong>Summary:</strong> All data stays on your device. No accounts, no cloud, no analytics.
+            <strong>Summary:</strong> Data stays on your device and in your browser account sync (if enabled). No third-party servers or analytics.
           </div>
           <h3>What is stored locally</h3>
           <ul>
             <li>URLs and titles of sites you watch</li>
             <li>CSS selectors (if using section watch)</li>
             <li>Content hashes and change history</li>
-            <li>Your settings (frequency, threshold)</li>
+            <li>Your settings (frequency, threshold, quiet hours)</li>
+            <li>Cross-device sync data (if enabled) via your browser account</li>
           </ul>
           <h3>What is transmitted</h3>
           <p>Network requests are made <em>only</em> to websites you have chosen to monitor — directly from your browser, with no intermediary servers.</p>

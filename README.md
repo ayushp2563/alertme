@@ -36,6 +36,22 @@ Cross-browser extension (Chrome / Edge / Brave via Manifest V3, Firefox-compatib
 - **Dashboard** — click "Dashboard" in the popup footer, or right-click the extension → Options
 - **Notifications** — OS notifications appear when significant changes are detected
 
+## Cross-device sync
+
+When signed into the same browser account (Chrome or Firefox) with sync enabled:
+
+- **Watched sites** sync across devices automatically
+- **Change alerts** notify all your devices when any one detects an update
+- Toggle in Dashboard → Settings
+
+Uses `chrome.storage.sync` — encrypted by your browser vendor, no Alert Me servers.
+
+## Additional features (v1.1)
+
+- **Quiet hours** — suppress notifications during set times (e.g. 10pm–8am)
+- **Snooze site** — mute alerts for 1h / 4h / 24h without stopping monitoring
+- **Cross-device notifications** — get alerted on phone/laptop/work PC simultaneously
+
 ## Privacy
 
 All data is stored locally on your device. No accounts, no cloud sync, no analytics. See [privacy.html](privacy.html) for the full policy.

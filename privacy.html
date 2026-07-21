@@ -40,30 +40,38 @@
 <body>
   <div class="container">
     <h1>Alert Me — Privacy Policy</h1>
-    <p class="updated">Last updated: July 10, 2026</p>
+    <p class="updated">Last updated: July 21, 2026</p>
 
     <div class="highlight">
-      <strong>Summary:</strong> Alert Me stores all data locally on your device. We do not collect, transmit, or sell any personal information. No accounts, no cloud servers, no analytics.
+      <strong>Summary:</strong> Alert Me stores data locally on your device. Optional cross-device sync uses your browser account (Chrome/Firefox sign-in) — no third-party servers, no analytics, no data sold.
     </div>
 
     <h2>What data is stored</h2>
-    <p>All data is saved in your browser's local storage (<code>chrome.storage.local</code>) and never leaves your device:</p>
+    <p>Data is saved in your browser's local storage (<code>chrome.storage.local</code>):</p>
     <ul>
       <li>URLs and page titles of sites you choose to watch</li>
       <li>CSS selectors for section-level watching (if you use that feature)</li>
       <li>Content hashes and text snapshots used for change detection</li>
       <li>Change history (timestamps, summaries, diff snippets)</li>
-      <li>Your settings (check frequency, significance threshold)</li>
+      <li>Your settings (check frequency, significance threshold, quiet hours)</li>
     </ul>
 
+    <h2>Cross-device sync (optional)</h2>
+    <p>If you enable cross-device sync, Alert Me also stores a compact copy of your watch list and change notification events in your browser's built-in sync storage (<code>chrome.storage.sync</code>). This is encrypted and synced by Google (Chrome) or Mozilla (Firefox) across devices signed into the same account.</p>
+    <ul>
+      <li>Synced: watched site URLs, titles, check frequency, pause/snooze state, change alert events</li>
+      <li>Not synced: full page content, content hashes, or detailed change history (stays local per device)</li>
+      <li>You can disable sync anytime in Settings</li>
+    </ul>
+    <p>Alert Me does not operate its own sync servers. Sync is handled entirely by your browser vendor's existing sync infrastructure.</p>
+
     <h2>What data is transmitted</h2>
-    <p>Alert Me makes network requests <em>only</em> to the websites you have explicitly chosen to monitor. These requests are made directly from your browser to those sites — the same as if you visited them yourself. No intermediary servers are involved.</p>
+    <p>Alert Me makes network requests <em>only</em> to the websites you have explicitly chosen to monitor. These requests are made directly from your browser to those sites — the same as if you visited them yourself. No Alert Me servers are involved.</p>
     <p>Alert Me does <strong>not</strong>:</p>
     <ul>
-      <li>Send data to any third-party servers</li>
+      <li>Send data to any Alert Me or third-party servers</li>
       <li>Use analytics or tracking services</li>
-      <li>Require an account or login</li>
-      <li>Sync data across devices</li>
+      <li>Require a separate account</li>
       <li>Share your watched sites with other users</li>
     </ul>
 

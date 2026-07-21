@@ -1,9 +1,10 @@
 /**
  * Alert Me — background service worker.
- * Handles alarm scheduling, page fetching, change detection, and notifications.
+ * Handles alarm scheduling, page fetching, change detection, notifications,
+ * and cross-device sync via the browser account.
  */
 
-importScripts('../lib/browser.js', '../lib/storage.js', '../lib/diff.js');
+importScripts('../lib/browser.js', '../lib/storage.js', '../lib/diff.js', '../lib/sync.js');
 
 const ALARM_NAME = 'alert-me-check';
 const BADGE_COLOR = '#E85D04';
@@ -13,6 +14,7 @@ browserAPI.runtime.onInstalled.addListener(async (details) => {
     await removeLegacyTestSite();
   }
   await scheduleNextCheck();
+  await SyncManager.mergeWatchListFromSync();
 });
 
 browserAPI.alarms.onAlarm.addListener(async (alarm) => {
@@ -23,6 +25,19 @@ browserAPI.alarms.onAlarm.addListener(async (alarm) => {
 });
 
 browserAPI.notifications.onClicked.addListener(async (notificationId) => {
+  if (notificationId.startsWith('alert-me-sync-')) {
+    const eventId = notificationId.replace('alert-me-sync-', '');
+    const url = await SyncManager.getSyncClickUrl(eventId);
+    if (url) {
+      await browserAPI.tabs.create({ url });
+      const sites = await StorageManager.getSites();
+      const site = sites.find((s) => s.url === url);
+      if (site) await StorageManager.markRead(site.id);
+      await updateBadge();
+    }
+    return;
+  }
+
   const siteId = notificationId.replace('alert-me-', '');
   const site = await StorageManager.getSite(siteId);
   if (site) {
@@ -39,6 +54,13 @@ browserAPI.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
+SyncManager.initSyncListener(async () => {
+  await SyncManager.mergeWatchListFromSync();
+  await SyncManager.processIncomingEvents(showCrossDeviceNotification);
+  await scheduleNextCheck();
+  await updateBadge();
+});
+
 async function handleMessage(message) {
   switch (message.type) {
     case 'CHECK_NOW':
@@ -48,6 +70,7 @@ async function handleMessage(message) {
       return watchPage(message.payload);
     case 'UNWATCH_PAGE':
       await StorageManager.removeSite(message.siteId);
+      await syncWatchList();
       await scheduleNextCheck();
       return { ok: true };
     case 'GET_SITES':
@@ -64,7 +87,15 @@ async function handleMessage(message) {
       return { ok: true };
     case 'UPDATE_SITE':
       await StorageManager.updateSite(message.siteId, message.updates);
+      await syncWatchList();
       await scheduleNextCheck();
+      return { ok: true };
+    case 'SNOOZE_SITE':
+      await StorageManager.snoozeSite(message.siteId, message.hours);
+      await syncWatchList();
+      return { ok: true };
+    case 'SYNC_WATCH_LIST':
+      await syncWatchList();
       return { ok: true };
     case 'START_PICKER':
       return startPickerOnTab(message.tabId);
@@ -96,9 +127,15 @@ async function watchPage(payload) {
     selector: payload.selector || null,
     frequency: payload.frequency || StorageManager.DEFAULT_FREQUENCY,
   });
+  await syncWatchList();
   await scheduleNextCheck();
   await checkSite(site);
   return site;
+}
+
+async function syncWatchList() {
+  const sites = await StorageManager.getSites();
+  await SyncManager.pushWatchList(sites);
 }
 
 async function startPickerOnTab(tabId) {
@@ -108,7 +145,7 @@ async function startPickerOnTab(tabId) {
 
 async function scheduleNextCheck() {
   const sites = await StorageManager.getSites();
-  const activeSites = sites.filter((s) => !s.paused);
+  const activeSites = sites.filter((s) => !s.paused && !StorageManager.isSnoozed(s));
 
   if (activeSites.length === 0) {
     await browserAPI.alarms.clear(ALARM_NAME);
@@ -171,7 +208,6 @@ async function checkSite(site) {
 
       if (DiffUtil.isSignificant(diff.changePercent, settings.significanceThreshold)) {
         updates.status = 'changed';
-        updates.unread = true;
         updates.lastHash = hash;
 
         const historyEntry = {
@@ -182,7 +218,13 @@ async function checkSite(site) {
         };
 
         await StorageManager.addHistoryEntry(site.id, historyEntry);
-        await sendChangeNotification(site, diff);
+
+        const freshSite = { ...site, ...updates };
+        if (StorageManager.shouldNotify(freshSite, settings)) {
+          updates.unread = true;
+          await sendChangeNotification(freshSite, diff);
+          await SyncManager.broadcastChangeEvent(freshSite, diff);
+        }
       } else {
         updates.lastHash = hash;
         updates.status = 'unchanged';
@@ -192,7 +234,6 @@ async function checkSite(site) {
       updates.status = 'unchanged';
     }
 
-    // Store last text for future diffs (trimmed to avoid bloat)
     updates._lastText = text.slice(0, 50000);
 
     await StorageManager.updateSite(site.id, updates);
@@ -274,7 +315,25 @@ async function sendChangeNotification(site, diff) {
     iconUrl: site.favicon || browserAPI.runtime.getURL('icons/icon128.png'),
     title: `${site.title} changed`,
     message: diff.summary,
-    contextMessage: diff.diffSnippet.slice(0, 200),
+    contextMessage: `${diff.diffSnippet.slice(0, 200)} — Click to visit`,
+    priority: 2,
+  });
+
+  await updateBadge();
+}
+
+async function showCrossDeviceNotification(event, settings) {
+  if (StorageManager.isQuietHours(settings)) return;
+
+  const notificationId = `alert-me-sync-${event.eventId}`;
+  await SyncManager.storeSyncClickUrl(event.eventId, event.url);
+
+  await browserAPI.notifications.create(notificationId, {
+    type: 'basic',
+    iconUrl: event.favicon || browserAPI.runtime.getURL('icons/icon128.png'),
+    title: `${event.title} was updated`,
+    message: event.summary || 'Content changed on a page you watch',
+    contextMessage: 'Detected on another device — Click to visit',
     priority: 2,
   });
 
@@ -292,5 +351,9 @@ async function updateBadge() {
   }
 }
 
-// Initial badge update on worker wake
+// Process any pending cross-device events on startup
+SyncManager.mergeWatchListFromSync()
+  .then(() => SyncManager.processIncomingEvents(showCrossDeviceNotification))
+  .then(updateBadge);
+
 updateBadge();

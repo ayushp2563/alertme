@@ -50,8 +50,9 @@ async function renderSitesTable() {
 }
 
 function renderSiteRow(site) {
-  const status = site.paused ? 'paused' : (site.status || 'pending');
+  const status = site.paused ? 'paused' : (StorageManager.isSnoozed(site) ? 'snoozed' : (site.status || 'pending'));
   const lastChecked = site.lastChecked ? formatDate(site.lastChecked) : 'Never';
+  const snoozeLabel = StorageManager.isSnoozed(site) ? ` · snoozed until ${formatDate(site.snoozedUntil)}` : '';
 
   return `
     <tr data-site-id="${site.id}" style="cursor:pointer">
@@ -66,7 +67,7 @@ function renderSiteRow(site) {
       </td>
       <td><span class="status-badge status-${status}">${status}</span></td>
       <td>${site.frequency}m</td>
-      <td>${lastChecked}</td>
+      <td>${lastChecked}${snoozeLabel}</td>
       <td>
         <div class="row-actions">
           <button data-action="pause" data-site-id="${site.id}">${site.paused ? 'Resume' : 'Pause'}</button>
@@ -109,6 +110,14 @@ async function showSiteDetail(siteId) {
       ${site.unread ? '<button class="btn btn-secondary" id="btn-mark-read">Mark as read</button>' : ''}
     </div>
 
+    <div class="detail-controls">
+      <span style="font-size:13px;color:#555">Snooze alerts:</span>
+      <button class="btn btn-secondary btn-snooze" data-hours="1">1 hour</button>
+      <button class="btn btn-secondary btn-snooze" data-hours="4">4 hours</button>
+      <button class="btn btn-secondary btn-snooze" data-hours="24">24 hours</button>
+      ${StorageManager.isSnoozed(site) ? '<button class="btn btn-secondary" id="btn-clear-snooze">Clear snooze</button>' : ''}
+    </div>
+
     <h4 style="margin-bottom:12px;font-size:14px;color:#888">Change history</h4>
     ${history.length === 0
       ? '<p class="empty-state" style="padding:20px">No changes detected yet</p>'
@@ -138,6 +147,26 @@ async function showSiteDetail(siteId) {
 
   $('#btn-mark-read')?.addEventListener('click', async () => {
     await browserAPI.runtime.sendMessage({ type: 'MARK_READ', siteId });
+    await showSiteDetail(siteId);
+  });
+
+  document.querySelectorAll('.btn-snooze').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      await browserAPI.runtime.sendMessage({
+        type: 'SNOOZE_SITE',
+        siteId,
+        hours: parseInt(btn.dataset.hours, 10),
+      });
+      await showSiteDetail(siteId);
+    });
+  });
+
+  $('#btn-clear-snooze')?.addEventListener('click', async () => {
+    await browserAPI.runtime.sendMessage({
+      type: 'UPDATE_SITE',
+      siteId,
+      updates: { snoozedUntil: null },
+    });
     await showSiteDetail(siteId);
   });
 }
@@ -191,6 +220,11 @@ async function loadSettings() {
   const settings = await StorageManager.getSettings();
   $('#significance-threshold').value = settings.significanceThreshold;
   $('#global-check-enabled').checked = settings.globalCheckEnabled;
+  $('#cross-device-sync').checked = settings.crossDeviceSync !== false;
+  $('#cross-device-notifications').checked = settings.crossDeviceNotifications !== false;
+  $('#quiet-hours-enabled').checked = settings.quietHoursEnabled;
+  $('#quiet-hours-start').value = settings.quietHoursStart || '22:00';
+  $('#quiet-hours-end').value = settings.quietHoursEnd || '08:00';
 }
 
 function bindEvents() {
@@ -221,7 +255,13 @@ function bindEvents() {
     await StorageManager.setSettings({
       significanceThreshold: parseFloat($('#significance-threshold').value),
       globalCheckEnabled: $('#global-check-enabled').checked,
+      crossDeviceSync: $('#cross-device-sync').checked,
+      crossDeviceNotifications: $('#cross-device-notifications').checked,
+      quietHoursEnabled: $('#quiet-hours-enabled').checked,
+      quietHoursStart: $('#quiet-hours-start').value,
+      quietHoursEnd: $('#quiet-hours-end').value,
     });
+    await browserAPI.runtime.sendMessage({ type: 'SYNC_WATCH_LIST' });
     const btn = e.target.querySelector('[type=submit]');
     btn.textContent = 'Saved!';
     setTimeout(() => { btn.textContent = 'Save settings'; }, 1500);

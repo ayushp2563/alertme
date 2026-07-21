@@ -58,17 +58,19 @@ async function loadSitesList() {
 }
 
 function renderSiteItem(site) {
-  const statusClass = site.paused ? 'status-paused' : `status-${site.status || 'pending'}`;
+  const isSnoozed = site.snoozedUntil && site.snoozedUntil > Date.now();
+  const statusClass = site.paused ? 'status-paused' : (isSnoozed ? 'status-paused' : `status-${site.status || 'pending'}`);
   const lastChecked = site.lastChecked
     ? formatRelativeTime(site.lastChecked)
     : 'Never checked';
+  const snoozeNote = isSnoozed ? ' · snoozed' : '';
 
   return `
     <li class="site-item" data-url="${escapeHtml(site.url)}" data-id="${site.id}">
       ${site.favicon ? `<img class="favicon" src="${escapeHtml(site.favicon)}" alt="">` : '<span class="status-dot ' + statusClass + '"></span>'}
       <div class="site-details">
         <div class="site-name">${escapeHtml(site.title)}</div>
-        <div class="site-meta">${lastChecked} · every ${site.frequency}m</div>
+        <div class="site-meta">${lastChecked} · every ${site.frequency}m${snoozeNote}</div>
       </div>
       ${site.unread ? '<span class="unread-dot"></span>' : ''}
     </li>
