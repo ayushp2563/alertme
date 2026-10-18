@@ -36,6 +36,37 @@ Cross-browser extension (Chrome / Edge / Brave via Manifest V3, Firefox-compatib
 - **Dashboard** — click "Dashboard" in the popup footer, or right-click the extension → Options
 - **Notifications** — OS notifications appear when significant changes are detected
 
+## Mobile push webhook (any watched page)
+
+Chrome on phones cannot run this extension. To get phone alerts, enable **Mobile push webhook** in Dashboard → Settings:
+
+1. Set your backend **POST** URL
+2. Optional Bearer token (`CHANGE_WEBHOOK_TOKEN`)
+3. Enable **Change webhook**
+
+On each significant change, the extension sends:
+
+```json
+{
+  "event": "page_changed",
+  "timestamp": 1690000000000,
+  "site": {
+    "id": "site_…",
+    "url": "https://example.com/page",
+    "title": "Page title",
+    "favicon": "…",
+    "selector": null
+  },
+  "change": {
+    "summary": "Content updated (5.2% changed)",
+    "diffSnippet": "+ new words…",
+    "changePercent": 5.2
+  }
+}
+```
+
+Your server can then call Firebase Cloud Messaging, Twilio, email, etc. Webhooks fire even when quiet hours suppress local desktop notifications.
+
 ## Cross-device sync
 
 When signed into the same browser account (Chrome or Firefox) with sync enabled:

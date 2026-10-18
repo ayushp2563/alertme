@@ -385,6 +385,15 @@ tr:hover td { background: #fafafa; }
   font-size: 14px;
 }
 
+.form-group input[type="password"],
+.form-group input[type="url"] {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
 .status-snoozed { background: #eef2ff; color: #6366f1; }
 
 .frequency-input {

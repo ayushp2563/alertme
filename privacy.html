@@ -65,8 +65,11 @@
     </ul>
     <p>Alert Me does not operate its own sync servers. Sync is handled entirely by your browser vendor's existing sync infrastructure.</p>
 
+    <h2>Change webhook (optional)</h2>
+    <p>If you enable the mobile push webhook in Settings, Alert Me will POST a JSON summary when a watched page changes to the URL you configure (for example your own backend to send FCM or SMS). This includes the page URL, title, and change summary — not full page HTML unless you add that on your server.</p>
+
     <h2>What data is transmitted</h2>
-    <p>Alert Me makes network requests <em>only</em> to the websites you have explicitly chosen to monitor. These requests are made directly from your browser to those sites — the same as if you visited them yourself. No Alert Me servers are involved.</p>
+    <p>Alert Me makes network requests to the websites you watch, and optionally to webhook URLs you configure (draw ingest and/or change notifications). No Alert Me-operated servers are involved.</p>
     <p>Alert Me does <strong>not</strong>:</p>
     <ul>
       <li>Send data to any Alert Me or third-party servers</li>

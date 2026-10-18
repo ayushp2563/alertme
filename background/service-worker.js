@@ -4,7 +4,15 @@
  * and cross-device sync via the browser account.
  */
 
-importScripts('../lib/browser.js', '../lib/storage.js', '../lib/diff.js', '../lib/sync.js');
+importScripts(
+  '../lib/browser.js',
+  '../lib/storage.js',
+  '../lib/diff.js',
+  '../lib/sync.js',
+  '../lib/draw-parser.js',
+  '../lib/draw-ingest.js',
+  '../lib/change-webhook.js'
+);
 
 const ALARM_NAME = 'alert-me-check';
 const BADGE_COLOR = '#E85D04';
@@ -99,6 +107,15 @@ async function handleMessage(message) {
       return { ok: true };
     case 'START_PICKER':
       return startPickerOnTab(message.tabId);
+    case 'NEW_DRAWS':
+    case 'INGEST_DRAWS':
+      return DrawIngest.sendDraws(message.draws);
+    case 'SAVE_DRAW_TOKEN':
+      await DrawIngest.setToken(message.token);
+      return { ok: true };
+    case 'SAVE_CHANGE_WEBHOOK_TOKEN':
+      await ChangeWebhook.setToken(message.token);
+      return { ok: true };
     default:
       return { error: 'Unknown message type' };
   }
@@ -120,12 +137,14 @@ async function getCurrentTabInfo() {
 }
 
 async function watchPage(payload) {
+  const drawIngest = payload.drawIngest ?? DrawParser.isDrawPageUrl(payload.url);
   const site = await StorageManager.addSite({
     url: payload.url,
     title: payload.title,
     favicon: payload.favicon,
     selector: payload.selector || null,
     frequency: payload.frequency || StorageManager.DEFAULT_FREQUENCY,
+    drawIngest,
   });
   await syncWatchList();
   await scheduleNextCheck();
@@ -220,11 +239,15 @@ async function checkSite(site) {
         await StorageManager.addHistoryEntry(site.id, historyEntry);
 
         const freshSite = { ...site, ...updates };
+        await ChangeWebhook.notifyChange(freshSite, diff, settings);
+
         if (StorageManager.shouldNotify(freshSite, settings)) {
           updates.unread = true;
           await sendChangeNotification(freshSite, diff);
           await SyncManager.broadcastChangeEvent(freshSite, diff);
         }
+
+        await maybeIngestDraws(freshSite, html, settings);
       } else {
         updates.lastHash = hash;
         updates.status = 'unchanged';
@@ -244,6 +267,48 @@ async function checkSite(site) {
       status: 'error',
       lastError: err.message,
     });
+  }
+}
+
+async function maybeIngestDraws(site, html, settings) {
+  if (settings.drawIngestEnabled === false) return;
+  if (!site.drawIngest && !DrawParser.isDrawPageUrl(site.url)) return;
+
+  let draws = DrawParser.extractDrawsFromHtml(html, site.url);
+
+  if (draws.length === 0) {
+    draws = await extractDrawsViaContentScript(site.url);
+  }
+
+  if (draws.length === 0) {
+    console.warn('[OINP Draws] Change detected but no draws parsed from', site.url);
+    return;
+  }
+
+  console.log(`[OINP Draws] Sending ${draws.length} draw(s) to webhook`);
+  await DrawIngest.sendDraws(draws);
+}
+
+async function extractDrawsViaContentScript(url) {
+  let tab;
+  try {
+    const tabs = await browserAPI.tabs.query({ url: url.split('#')[0] + '*' });
+    if (tabs.length > 0) {
+      const result = await browserAPI.tabs.sendMessage(tabs[0].id, { type: 'EXTRACT_DRAWS' });
+      return result?.draws || [];
+    }
+
+    tab = await browserAPI.tabs.create({ url, active: false });
+    await waitForTabLoad(tab.id);
+    const result = await browserAPI.tabs.sendMessage(tab.id, { type: 'EXTRACT_DRAWS' });
+    return result?.draws || [];
+  } catch (err) {
+    console.warn('[OINP Draws] Content script extraction failed:', err.message);
+    return [];
+  } finally {
+    if (tab?.id) {
+      await browserAPI.tabs.remove(tab.id).catch(() => {});
+    }
   }
 }
 

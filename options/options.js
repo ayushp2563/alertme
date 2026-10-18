@@ -225,6 +225,17 @@ async function loadSettings() {
   $('#quiet-hours-enabled').checked = settings.quietHoursEnabled;
   $('#quiet-hours-start').value = settings.quietHoursStart || '22:00';
   $('#quiet-hours-end').value = settings.quietHoursEnd || '08:00';
+  $('#draw-ingest-enabled').checked = settings.drawIngestEnabled !== false;
+  $('#change-webhook-enabled').checked = settings.changeWebhookEnabled === true;
+  $('#change-webhook-url').value = settings.changeWebhookUrl || '';
+
+  const tokenResult = await browserAPI.storage.local.get(['DRAW_INGEST_TOKEN', 'CHANGE_WEBHOOK_TOKEN']);
+  if ($('#draw-ingest-token') && tokenResult.DRAW_INGEST_TOKEN) {
+    $('#draw-ingest-token').placeholder = '•••••••• (saved — enter new value to replace)';
+  }
+  if ($('#change-webhook-token') && tokenResult.CHANGE_WEBHOOK_TOKEN) {
+    $('#change-webhook-token').placeholder = '•••••••• (saved — enter new value to replace)';
+  }
 }
 
 function bindEvents() {
@@ -260,7 +271,22 @@ function bindEvents() {
       quietHoursEnabled: $('#quiet-hours-enabled').checked,
       quietHoursStart: $('#quiet-hours-start').value,
       quietHoursEnd: $('#quiet-hours-end').value,
+      drawIngestEnabled: $('#draw-ingest-enabled').checked,
+      changeWebhookEnabled: $('#change-webhook-enabled').checked,
+      changeWebhookUrl: $('#change-webhook-url').value.trim(),
     });
+    const token = $('#draw-ingest-token')?.value?.trim();
+    if (token) {
+      await browserAPI.runtime.sendMessage({ type: 'SAVE_DRAW_TOKEN', token });
+      $('#draw-ingest-token').value = '';
+      $('#draw-ingest-token').placeholder = '•••••••• (saved — enter new value to replace)';
+    }
+    const changeToken = $('#change-webhook-token')?.value?.trim();
+    if (changeToken) {
+      await browserAPI.runtime.sendMessage({ type: 'SAVE_CHANGE_WEBHOOK_TOKEN', token: changeToken });
+      $('#change-webhook-token').value = '';
+      $('#change-webhook-token').placeholder = '•••••••• (saved — enter new value to replace)';
+    }
     await browserAPI.runtime.sendMessage({ type: 'SYNC_WATCH_LIST' });
     const btn = e.target.querySelector('[type=submit]');
     btn.textContent = 'Saved!';
